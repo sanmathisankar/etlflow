@@ -7,7 +7,7 @@ import com.coralogix.zio.k8s.client.v1.pods.Pods
 import com.coralogix.zio.k8s.model.batch.v1.{Job, JobSpec}
 import com.coralogix.zio.k8s.model.pkg.apis.meta.v1.ObjectMeta
 import zio.stream.ZStream
-import zio.{RIO, TaskLayer, ZIO}
+import zio.{RIO, TaskLayer, ZIO, ZLayer}
 
 @SuppressWarnings(Array("org.wartremover.warts.ToString"))
 case class K8s() extends K8sApi.Service {
@@ -31,5 +31,5 @@ case class K8s() extends K8sApi.Service {
 }
 
 object K8s {
-  def live: TaskLayer[Jobs with Pods] = k8sDefault >>> (Jobs.live ++ Pods.live)
+  val live: TaskLayer[K8sEnv with Jobs with Pods] = (k8sDefault >>> (Jobs.live ++ Pods.live)) ++ ZLayer.succeed(K8s())
 }
